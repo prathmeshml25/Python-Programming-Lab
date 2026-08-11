@@ -2,11 +2,10 @@
 
 fruits = {"apple", "banana", "cherry"}
 
-fruits.add("mango")
-print(fruits)
+fruits.add("orange")
 
 fruits.remove("banana")
-print(fruits)
 
-fruits.discard("apple")
+fruits.discard("cherry")
+
 print(fruits)
