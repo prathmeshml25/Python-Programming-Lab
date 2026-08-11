@@ -1,0 +1,10 @@
+# 12. Write a Python program to remove a specific key from a dictionary, retrieve all key-value pairs, and check whether a given key exists. Given Input: car = {"brand": "Toyota", "model": "Camry", "year": 2022, "color": "blue"} 
+
+car = {"brand": "Toyota", "model": "Camry", "year": 2022, "color": "blue"}
+
+del car["color"]
+
+print(car.items())
+
+key = "brand"
+print(key in car)

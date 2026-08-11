@@ -1,0 +1,7 @@
+# 20. Write a Python program to convert a tuple of characters into a single joined string. Given Input: chars = ('a', 'b', 'c') 
+
+chars = ('a', 'b', 'c')
+
+result = ''.join(chars)
+
+print(result)

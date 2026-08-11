@@ -1,0 +1,15 @@
+# 5.  Given a list of integers, iterate through the items and count how many are even and how many are odd. Given Input: Numbers: [10, 21, 4, 45, 66, 93, 11] 
+
+numbers = [10, 21, 4, 45, 66, 93, 11]
+
+even = 0
+odd = 0
+
+for number in numbers:
+    if number % 2 == 0:
+        even += 1
+    else:
+        odd += 1
+
+print(even)
+print(odd)
