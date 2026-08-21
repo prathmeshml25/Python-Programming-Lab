@@ -1,0 +1,56 @@
+# Online Quiz Management System
+
+questions = [
+    {
+        "question": "What is Python?",
+        "options": ["Programming Language", "Browser", "Operating System", "Database"],
+        "answer": 1
+    },
+    {
+        "question": "Which keyword is used to create a function in Python?",
+        "options": ["function", "def", "fun", "create"],
+        "answer": 2
+    },
+    {
+        "question": "Which symbol is used for comments in Python?",
+        "options": ["//", "#", "/*", "--"],
+        "answer": 2
+    }
+]
+
+print("===== ONLINE QUIZ MANAGEMENT SYSTEM =====")
+
+name = input("Enter Student Name: ")
+score = 0
+
+for q in questions:
+    print("\n" + q["question"])
+
+    for i in range(len(q["options"])):
+        print(i + 1, ".", q["options"][i])
+
+    answer = int(input("Enter your answer: "))
+
+    if answer == q["answer"]:
+        print("Correct Answer!")
+        score += 1
+    else:
+        print("Wrong Answer!")
+
+# Performance Report
+total_questions = len(questions)
+percentage = (score / total_questions) * 100
+
+print("\n===== PERFORMANCE REPORT =====")
+print("Student Name:", name)
+print("Total Questions:", total_questions)
+print("Correct Answers:", score)
+print("Score:", score, "/", total_questions)
+print("Percentage:", percentage, "%")
+
+if percentage >= 75:
+    print("Performance: Excellent")
+elif percentage >= 50:
+    print("Performance: Good")
+else:
+    print("Performance: Needs Improvement")
