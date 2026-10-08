@@ -1,0 +1,83 @@
+class Question:
+    def __init__(self, text, options, answer):
+        self.text = text
+        self.options = options
+        self.answer = answer
+
+
+class Quiz:
+    def __init__(self, name):
+        self.name = name
+        self.questions = []
+
+    def add_question(self, text, options, answer):
+        self.questions.append(Question(text, options, answer))
+
+
+def evaluate(quiz, responses):
+    score = 0
+
+    for i, question in enumerate(quiz.questions):
+        if responses[i] == question.answer:
+            score += 1
+
+    return score
+
+
+def show_result(quiz, score):
+    total = len(quiz.questions)
+    percentage = score / total * 100
+
+    print("\nRESULT")
+    print(f"Score: {score}/{total}")
+    print(f"Percentage: {percentage:.0f}%")
+
+
+if __name__ == "__main__":
+
+    quiz = Quiz("General Knowledge Quiz")
+
+    quiz.add_question(
+        "Capital of France?",
+        ["Berlin", "Paris", "Rome"],
+        2
+    )
+
+    quiz.add_question(
+        "Largest Planet?",
+        ["Earth", "Mars", "Jupiter"],
+        3
+    )
+
+    quiz.add_question(
+        "Python Creator?",
+        ["Guido", "Linus", "James"],
+        1
+    )
+
+    print(f"Quiz Created: {quiz.name}")
+
+    responses = []
+
+    for i, question in enumerate(quiz.questions, 1):
+        print(f"\nQ{i}. {question.text}")
+
+        for number, option in enumerate(question.options, 1):
+            print(f"{number}. {option}")
+
+        while True:
+            try:
+                answer = int(input("Enter your answer: "))
+
+                if 1 <= answer <= len(question.options):
+                    responses.append(answer)
+                    break
+                else:
+                    print("Please enter a valid option.")
+
+            except ValueError:
+                print("Please enter a number.")
+
+    score = evaluate(quiz, responses)
+
+    show_result(quiz, score)
