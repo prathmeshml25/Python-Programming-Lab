@@ -1,6 +1,7 @@
+from flask import Flask, request, render_template_string
 import random
-import csv
-import os
+
+app = Flask(__name__)
 
 questions = {
     "Python": [
@@ -10,74 +11,142 @@ questions = {
     ],
     "C++": [
         ("Who developed C++?", ["Bjarne Stroustrup", "James Gosling", "Guido"], 1),
-        ("Which symbol ends a statement?", [".", ";", ":"], 2),
-        ("Which function starts execution?", ["start()", "main()", "run()"], 2)
+        ("Which symbol ends a statement?", [".", ";", ":"], 2)
     ],
     "General Knowledge": [
         ("Capital of France?", ["Berlin", "Paris", "Rome"], 2),
-        ("Largest planet?", ["Earth", "Mars", "Jupiter"], 3),
-        ("Red Planet?", ["Venus", "Mars", "Saturn"], 2)
+        ("Largest planet?", ["Earth", "Mars", "Jupiter"], 3)
     ]
 }
 
-name = input("Enter Student Name: ")
+PAGE = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Quiz Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef2ff;
+            padding: 20px;
+        }
+        .box {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+        }
+        h1, h2 { color: #4338ca; text-align: center; }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+        button {
+            background: #4338ca;
+            color: white;
+            border: 0;
+            cursor: pointer;
+        }
+        .option { display: block; margin: 10px 0; }
+    </style>
+</head>
+<body>
+<div class="box">
+<h1>Online Quiz System</h1>
 
-print("\nSelect Category:")
-categories = list(questions.keys())
+{% if result is none %}
+<form method="POST">
+    <input name="student" placeholder="Enter your name" required>
+    <select name="category">
+        {% for c in categories %}
+        <option>{{ c }}</option>
+        {% endfor %}
+    </select>
 
-for i, category in enumerate(categories, 1):
-    print(f"{i}. {category}")
+    {% if quiz %}
+        <input type="hidden" name="quiz_id" value="{{ quiz_id }}">
+        {% for q in quiz %}
+            <h3>{{ loop.index }}. {{ q[0] }}</h3>
+            {% for option in q[1] %}
+                <label class="option">
+                    <input style="width:auto" type="radio"
+                    name="q{{ loop.index0 }}" value="{{ loop.index0 }}" required>
+                    {{ option }}
+                </label>
+            {% endfor %}
+        {% endfor %}
+        <button name="submit" value="yes">Submit Quiz</button>
+    {% else %}
+        <button name="start" value="yes">Start Quiz</button>
+    {% endif %}
+</form>
+{% else %}
+    <h2>Quiz Result</h2>
+    <p>Student: {{ student }}</p>
+    <p>Category: {{ category }}</p>
+    <h2>Score: {{ result }}/{{ total }}</h2>
+    <h2>Percentage: {{ percentage }}%</h2>
+    <a href="/">Try Again</a>
+{% endif %}
+</div>
+</body>
+</html>
+"""
 
-while True:
-    try:
-        choice = int(input("Enter choice: "))
-        if 1 <= choice <= len(categories):
-            category = categories[choice - 1]
-            break
-        print("Invalid choice. Try again.")
-    except ValueError:
-        print("Enter a number.")
+@app.route("/", methods=["GET", "POST"])
+def home():
+    categories = list(questions.keys())
+    quiz = None
+    result = None
 
-quiz = questions[category].copy()
-random.shuffle(quiz)
+    if request.method == "POST":
+        student = request.form.get("student", "").strip()
+        category = request.form.get("category", "")
 
-score = 0
+        if not student:
+            return "Please enter your name.", 400
 
-for i, (question, options, correct) in enumerate(quiz, 1):
-    print(f"\nQ{i}. {question}")
+        if category not in questions:
+            return "Invalid category.", 400
 
-    for j, option in enumerate(options, 1):
-        print(f"{j}. {option}")
+        if request.form.get("start"):
+            quiz = random.sample(questions[category], len(questions[category]))
+            return render_template_string(
+                PAGE, categories=categories, quiz=quiz,
+                quiz_id=category, result=None
+            )
 
-    while True:
-        try:
-            answer = int(input("Your answer: "))
-            if 1 <= answer <= len(options):
-                break
-            print("Choose a valid option.")
-        except ValueError:
-            print("Please enter a number.")
+        if request.form.get("submit"):
+            category = request.form.get("quiz_id", category)
+            if category not in questions:
+                return "Invalid quiz.", 400
 
-    if answer == correct:
-        score += 1
+            quiz = questions[category]
+            score = 0
 
-total = len(quiz)
-percentage = score / total * 100
+            for i, q in enumerate(quiz):
+                answer = request.form.get(f"q{i}")
+                if answer is not None and answer.isdigit():
+                    if int(answer) == q[2] - 1:
+                        score += 1
 
-print("\n===== QUIZ RESULT =====")
-print("Student:", name)
-print("Category:", category)
-print("Score:", score, "/", total)
-print(f"Percentage: {percentage:.0f}%")
+            total = len(quiz)
+            percentage = round(score / total * 100)
 
-file_exists = os.path.exists("results.csv")
+            return render_template_string(
+                PAGE, categories=categories, quiz=None,
+                result=score, total=total,
+                percentage=percentage,
+                student=student, category=category
+            )
 
-with open("results.csv", "a", newline="") as file:
-    writer = csv.writer(file)
+    return render_template_string(
+        PAGE, categories=categories, quiz=quiz, result=result
+    )
 
-    if not file_exists or os.path.getsize("results.csv") == 0:
-        writer.writerow(["Student", "Category", "Score", "Total", "Percentage"])
-
-    writer.writerow([name, category, score, total, f"{percentage:.0f}%"])
-
-print("\nResult saved successfully!")
+if __name__ == "__main__":
+    app.run()
